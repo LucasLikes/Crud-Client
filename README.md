@@ -1,340 +1,231 @@
-# Lume — Sistema de Gestão de Clientes
+# 🚀 Lume — Sistema de Gestão de Clientes
 
-Sistema completo com **autenticação JWT**, **CRUD de clientes** e **integração com ViaCEP**.
-Stack: **Spring Boot 3 + React 19 + Docker**.
+Sistema fullstack com **autenticação JWT**, **controle de acesso por perfil (RBAC)**, **CRUD de clientes** e **integração com ViaCEP**.
 
----
-
-## 📋 Sumário
-
-- [Pré-requisitos](#pré-requisitos)
-- [Como executar com Docker](#como-executar-com-docker-recomendado)
-- [Como executar sem Docker](#como-executar-sem-docker-desenvolvimento)
-- [Acessar o Swagger](#acessar-o-swagger)
-- [Acessar o Frontend](#acessar-o-frontend)
-- [Credenciais de exemplo](#credenciais-de-exemplo)
-- [Funcionalidades](#funcionalidades)
-- [Arquitetura](#arquitetura)
-- [Endpoints da API](#endpoints-da-api)
+Stack:
+- Backend: **Spring Boot 3 (Java 21)**
+- Frontend: **React + Vite**
+- Infra: **Docker**
 
 ---
 
-## Pré-requisitos
+## 📸 Demonstração da Aplicação
 
-| Com Docker | Sem Docker |
-|------------|------------|
-| Docker Desktop instalado e rodando | Java 21 + Maven |
-| — | Node.js 20+ |
+### 👑 Admin — CRUD de Clientes
+
+- Botão **"Adicionar Cliente" habilitado**
+- Pode criar, editar e excluir clientes
+- Menu **Configurações visível**
+
+![Admin CRUD Clientes](docs/client-admin.jpeg)
 
 ---
 
-## Como executar com Docker (recomendado)
+### 🔒 Admin — Gerenciamento de Usuários
 
-### 1. Clonar o repositório
+- Apenas usuários com `ROLE_ADMIN` têm acesso
+- CRUD completo de usuários
+- Controle de permissões
+
+![Gerenciamento de Usuários](docs/geren-user.jpeg)
+
+---
+
+### 👤 Usuário Padrão — Somente Visualização
+
+- Não pode criar, editar ou excluir
+- Interface adaptada (botões desabilitados)
+- Menu de configurações oculto
+
+![Usuário padrão](docs/client-user-padrao.jpeg)
+
+---
+
+### 📄 Swagger — Documentação da API
+
+- Teste de endpoints direto no navegador
+- Autenticação via JWT (Bearer Token)
+
+![Swagger](docs/swagger.jpeg)
+
+---
+
+## 🔐 Funcionalidades
+
+### Autenticação
+- Registro de usuário com email e senha
+- Login com JWT (Access Token + Refresh Token)
+- Refresh Token automático com rotação
+- Logout com invalidação do token no banco
+
+### Controle de Acesso (RBAC)
+
+| Ação | Admin | Usuário |
+|------|-------|---------|
+| Visualizar clientes | ✅ | ✅ |
+| Criar cliente | ✅ | ❌ |
+| Editar cliente | ✅ | ❌ |
+| Deletar cliente | ✅ | ❌ |
+| Gerenciar usuários | ✅ | ❌ |
+| Acessar Configurações | ✅ | ❌ |
+
+> O RBAC é aplicado em duas camadas: `@PreAuthorize` no backend e controle de visibilidade no frontend.
+
+---
+
+## ⚙️ Como Executar
+
+### 🐳 Com Docker (recomendado)
 
 ```bash
-git clone https://github.com/seu-usuario/seu-repo.git
-cd seu-repo
-```
-
-### 2. Subir o Backend
-
-```bash
+# Backend
 cd lume-api
 docker build -t lume-api .
-docker run -p 8080:8080 --name lume-api lume-api
-```
+docker run -p 8080:8080 lume-api
 
-### 3. Subir o Frontend
-
-```bash
+# Frontend (em outro terminal)
 cd front-react
 docker-compose up --build
 ```
 
-**Pronto!**
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:8080
-- Swagger UI: http://localhost:8080/swagger-ui.html
+### 💻 Sem Docker
 
----
-
-## Como executar sem Docker (desenvolvimento)
-
-### Backend
-
+#### Backend
 ```bash
 cd lume-api
-./mvnw spring-boot:run
-# Windows:
-mvnw.cmd spring-boot:run
+.\mvnw.cmd spring-boot:run
 ```
 
-Backend sobe em `http://localhost:8080`
-
-### Frontend
-
+#### Frontend
 ```bash
 cd front-react
 npm install
 npm run dev
 ```
 
-Frontend sobe em `http://localhost:5173`
-
-> **Dica:** Para testar o frontend sem backend, acesse `http://localhost:5173?mock=true`
+> **Dica:** para rodar o frontend sem o backend, acesse `http://localhost:5173?mock=true`
 
 ---
 
-## Acessar o Swagger
+## 🌐 Acessos
 
-Com o backend rodando, abra no navegador:
+| Serviço | URL |
+|---------|-----|
+| Frontend | http://localhost:5173 |
+| Backend | http://localhost:8080 |
+| Swagger UI | http://localhost:8080/swagger-ui.html |
+| H2 Console | http://localhost:8080/h2-console |
 
-```
-http://localhost:8080/swagger-ui.html
-```
-
-### Como autenticar no Swagger:
-
-1. Clique em **POST /api/v1/auth/login**
-2. Clique em **Try it out**
-3. Use o body:
-```json
-{
-  "email": "admin@lume.com",
-  "password": "admin123"
-}
-```
-4. Execute — copie o valor de `accessToken`
-5. Clique no botão **🔐 Authorize** (topo da página)
-6. Cole o token no campo `bearerAuth`: `Bearer <seu_token>`
-7. Clique **Authorize** → agora todos os endpoints funcionam
+**H2 Console:**
+- JDBC URL: `jdbc:h2:mem:lumedb`
+- Usuário: `sa` / Senha: _(vazio)_
 
 ---
 
-## Acessar o Frontend
+## 🔑 Credenciais de Exemplo
 
-```
-http://localhost:5173
-```
+| Tipo | Email | Senha |
+|------|-------|-------|
+| Admin | admin@lume.com | admin123 |
 
-Login na tela inicial com as credenciais abaixo.
+> O usuário admin é criado automaticamente ao subir o backend.
 
----
+### Como usar o Swagger
 
-## Credenciais de exemplo
-
-| Tipo | Email | Senha | Permissões |
-|------|-------|-------|------------|
-| **Admin** | `admin@lume.com` | `admin123` | Criar, editar, excluir clientes e usuários |
-| **Usuário** | _(criar via Swagger ou tela de registro)_ | _(sua senha)_ | Somente visualizar clientes |
-
-> O usuário **admin** é criado automaticamente ao subir o backend.
+1. `POST /api/v1/auth/login` com as credenciais acima
+2. Copie o `accessToken` retornado
+3. Clique em **Authorize** (🔐) no topo do Swagger
+4. Cole: `Bearer <seu_token>`
 
 ---
 
-## Funcionalidades
+## 🧪 Testes
 
-### Autenticação & Autorização
+O projeto conta com suite completa de **testes unitários e de integração (TDD)**.
 
-| Funcionalidade | Endpoint | Autenticação? |
-|----------------|----------|---------------|
-| Registrar usuário | `POST /api/v1/auth/register` | Pública |
-| Login (JWT) | `POST /api/v1/auth/login` | Pública |
-| Renovar access token | `POST /api/v1/auth/refresh` | Pública |
-| Logout | `POST /api/v1/auth/logout` | Pública |
+### Como rodar
 
-### CRUD de Clientes (requer JWT)
+```bash
+# Windows
+.\mvnw.cmd test
 
-| Funcionalidade | Endpoint | Role |
-|----------------|----------|------|
-| Listar clientes | `GET /api/v1/customers` | Qualquer autenticado |
-| Buscar por ID | `GET /api/v1/customers/{id}` | Qualquer autenticado |
-| Criar cliente | `POST /api/v1/customers` | Qualquer autenticado |
-| Atualizar cliente | `PUT /api/v1/customers/{id}` | Qualquer autenticado |
-| Deletar cliente | `DELETE /api/v1/customers/{id}` | Qualquer autenticado |
-| Buscar endereço por CEP | `GET /api/v1/customers/address-lookup/{cep}` | Qualquer autenticado |
+# Linux / Mac
+./mvnw test
+```
 
-### RBAC no Frontend
+Resultado esperado:
+```
+Tests run: 72, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS
+```
 
-| Ação | Admin (`ROLE_ADMIN`) | Usuário (`ROLE_USER`) |
-|------|----------------------|----------------------|
-| Visualizar clientes | ✅ | ✅ |
-| Criar / editar / excluir clientes | ✅ | ❌ |
-| Acessar tela Configurações | ✅ | ❌ |
-| Criar / editar / excluir usuários | ✅ | ❌ |
-| Menu "Configurações" visível | ✅ | ❌ |
+### Cobertura
+
+| Classe de Teste | Tipo | O que cobre |
+|-----------------|------|-------------|
+| `AuthServiceTest` | Unitário | Register (email duplicado, atribuição de ROLE_USER, encoding de senha), Login (delegação ao AuthenticationManager, BadCredentials), Refresh (rotation, revogação), Logout, deriveNamesFromEmail |
+| `CustomerServiceTest` | Unitário | Create (CPF duplicado, mapeamento de endereço), FindById (not found), FindAll (lista vazia), Update (CPF de outro cliente, not found), Delete (not found) |
+| `JwtServiceTest` | Unitário | Geração de token, extração de username, validação por usuário, `toClientRole` (ROLE_ADMIN→admin, fallback→user), claims completos, token adulterado, token expirado |
+| `CpfValidatorTest` | Unitário | CPFs válidos com/sem formatação, sequências repetidas (000...0 a 999...9), dígitos verificadores errados, tamanho inválido, null, só letras |
+| `CustomerControllerIT` | Integração | 401 sem token, 403 para ROLE_USER em mutations, 201/409/400 para admin, 204 delete, 404 not found, guard no address-lookup |
+| `AuthControllerIT` | Integração | Register 201/409/400, Login 200/401, Refresh com token rotation, 401 token inválido |
+| `ViaCepClientTest` | Unitário | Resposta de sucesso, strip de formatação, fallback parcial em timeout, fallback em null, fallback em payload `{erro:true}` |
+
+### Configuração de teste
+
+Testes de integração usam perfil `test` com banco H2 isolado e DDL `create-drop`, sem interferir no banco de desenvolvimento.
 
 ---
 
-## Arquitetura
+## 🏗️ Arquitetura
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                    FRONTEND (React)                  │
-│                                                     │
-│  LoginPage  →  AuthContext (JWT decode)             │
-│  CustomersPage  →  useRbac() → ROLE_ADMIN check     │
-│  ConfigPage  →  Apenas ROLE_ADMIN                   │
-│  httpClient (Axios) → Bearer token automático       │
-│  Refresh token automático em 401                    │
-└────────────────────────┬────────────────────────────┘
-                         │ HTTP + Bearer JWT
-┌────────────────────────▼────────────────────────────┐
-│                   BACKEND (Spring Boot)              │
-│                                                     │
-│  JwtAuthenticationFilter → valida token             │
-│  SecurityConfig → rotas públicas / protegidas       │
-│  AuthController → /register /login /refresh /logout │
-│  CustomerController → CRUD clientes                 │
-│  CepService → ViaCEP integration                    │
-│  H2 Database (in-memory)                            │
-└─────────────────────────────────────────────────────┘
+┌─────────────────────────────────┐
+│         Frontend (React)        │
+│  AuthContext → decode JWT role  │
+│  useRbac() → ROLE_ADMIN check   │
+│  httpClient → Bearer automático │
+└────────────────┬────────────────┘
+                 │ HTTP + JWT
+┌────────────────▼────────────────┐
+│       Backend (Spring Boot)     │
+│  JwtAuthenticationFilter        │
+│  @PreAuthorize("hasRole(...)") │
+│  AuthController / Customer...   │
+│  ViaCEP integration             │
+│  H2 in-memory database          │
+└─────────────────────────────────┘
 ```
 
 ### Estrutura do Backend
 
 ```
 src/main/java/com/lume/lumeapi/
-├── config/          # SecurityConfig, BeanConfig, SwaggerConfig
-├── controller/      # AuthController, CustomerController
+├── config/           # Security, Bean, Swagger, CORS, DataInitializer
+├── controller/       # AuthController, CustomerController, UserController
 ├── domain/
-│   ├── dto/
-│   │   ├── request/  # AuthRequest, CustomerRequest
-│   │   └── response/ # AuthResponse, CustomerResponse
-│   └── entity/      # User, Customer, Address, RefreshToken
-├── enums/           # Role (ROLE_ADMIN, ROLE_USER)
-├── exception/       # GlobalExceptionHandler + exceções
-├── integration/cep/ # ViaCepClient, ViaCepResponse
-├── repository/      # UserRepository, CustomerRepository, RefreshTokenRepository
-├── security/        # JwtService, JwtAuthenticationFilter, UserDetailsServiceImpl
-├── service/         # AuthService, CustomerService, TokenService, CepService
-└── validation/      # ValidCpf, CpfValidator
-```
-
-### Estrutura do Frontend
-
-```
-src/
-├── api/           # authApi, customersApi, httpClient, mockApi
-├── components/
-│   ├── layout/    # AppLayout, Drawer
-│   ├── ui/        # Button, Alert, Card, Modal, Spinner, ConfirmDialog
-│   └── users/     # UserForm, UserTable
-├── context/       # AuthContext (decodifica JWT, expõe isAdmin)
-├── features/
-│   ├── customers/ # useCustomers hook
-│   └── users/     # useUsers hook
-├── hooks/         # useAuth, useRbac
-├── pages/         # LoginPage, RegisterPage, HomePage, CustomersPage, ConfigPage
-└── utils/         # logger, storage, cpf, formatters
+│   ├── dto/          # AuthRequest/Response, CustomerRequest/Response
+│   └── entity/       # User, Customer, Address (Embeddable), RefreshToken
+├── enums/            # Role (ROLE_ADMIN, ROLE_USER)
+├── exception/        # GlobalExceptionHandler + exceções customizadas
+├── integration/cep/  # ViaCepClient, ViaCepResponse
+├── repository/       # UserRepository, CustomerRepository, RefreshTokenRepository
+├── security/         # JwtService, JwtAuthenticationFilter, UserDetailsServiceImpl
+├── service/          # AuthService, CustomerService, TokenService, CepService
+└── validation/       # @ValidCpf, CpfValidator
 ```
 
 ---
 
-## Endpoints da API
+## 📌 Diferenciais do Projeto
 
-### Auth
-
-```
-POST /api/v1/auth/register
-Body: { "email": "user@email.com", "password": "senha123" }
-Response: { "message": "User registered successfully" }
-
-POST /api/v1/auth/login
-Body: { "email": "admin@lume.com", "password": "admin123" }
-Response: { "accessToken": "eyJ...", "refreshToken": "uuid..." }
-
-POST /api/v1/auth/refresh
-Body: { "refreshToken": "uuid..." }
-Response: { "accessToken": "eyJ..." }
-
-POST /api/v1/auth/logout
-Body: { "refreshToken": "uuid..." }
-Response: { "message": "Logged out successfully" }
-```
-
-### Customers (requer Authorization: Bearer <token>)
-
-```
-GET    /api/v1/customers              → lista todos
-GET    /api/v1/customers/{id}         → busca por ID
-POST   /api/v1/customers              → cria (CPF validado)
-PUT    /api/v1/customers/{id}         → atualiza
-DELETE /api/v1/customers/{id}         → remove
-
-GET    /api/v1/customers/address-lookup/{cep}  → busca endereço via ViaCEP
-```
-
-### Exemplo de criação de cliente
-
-```bash
-curl -X POST http://localhost:8080/api/v1/customers \
-  -H "Authorization: Bearer SEU_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "João Silva",
-    "cpf": "52998224725",
-    "address": {
-      "street": "Rua das Flores",
-      "neighborhood": "Centro",
-      "city": "São Paulo",
-      "state": "SP",
-      "zipCode": "01310100"
-    }
-  }'
-```
+- ✅ Autenticação JWT completa (Access + Refresh Token com rotation)
+- ✅ RBAC aplicado no backend (`@PreAuthorize`) e no frontend (visibilidade)
+- ✅ Validação de CPF com dígito verificador via annotation customizada `@ValidCpf`
+- ✅ Integração com ViaCEP com fallback resiliente (sem 500 em caso de timeout)
+- ✅ Suite de testes: 72 testes, unitários + integração, 0 falhas
+- ✅ Docker multi-stage (imagem de build separada da imagem de runtime)
+- ✅ Swagger documentado com autenticação Bearer
+- ✅ H2 Console acessível para debug em desenvolvimento
 
 ---
-
-## Detalhes Técnicos
-
-### JWT
-
-- **Access Token**: válido por 15 minutos
-- **Refresh Token**: válido por 7 dias, invalidado no logout
-- Claims: `{ sub: email, role: "ROLE_ADMIN"|"ROLE_USER", iat, exp }`
-
-### Banco de Dados (H2)
-
-- In-memory, zerado a cada restart
-- Console: http://localhost:8080/h2-console
-  - JDBC URL: `jdbc:h2:mem:lumedb`
-  - User: `sa` / Senha: _(vazio)_
-
-### Validações
-
-- **CPF**: validação de formato + dígito verificador (anotação `@ValidCpf`)
-- **Email**: formato válido obrigatório
-- **Senha**: mínimo 6 caracteres
-- **Endereço**: todos os campos obrigatórios
-
-### Integração ViaCEP
-
-O endpoint `GET /api/v1/customers/address-lookup/{cep}` consome `https://viacep.com.br/ws/{cep}/json/`
-e retorna logradouro, bairro, cidade e estado automaticamente.
-
----
-
-## Troubleshooting
-
-### Docker: "no such host" ao fazer build
-
-Configure o DNS no Docker Desktop → Settings → Docker Engine:
-```json
-{
-  "dns": ["8.8.8.8", "8.8.4.4"]
-}
-```
-
-### Frontend: CORS error
-
-Certifique-se que o backend está rodando em `http://localhost:8080`.
-O `VITE_API_BASE_URL` no `.env` deve apontar para o backend.
-
-### Frontend sem backend
-
-Adicione `?mock=true` na URL para usar dados mockados:
-```
-http://localhost:5173?mock=true
-```

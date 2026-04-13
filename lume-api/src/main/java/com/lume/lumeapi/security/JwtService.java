@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -28,6 +29,10 @@ import java.util.Map;
  *   de implementação no JWT acopla o cliente ao framework.
  *   O mapeamento ROLE_ ↔ admin/user ocorre nesta camada, mantendo o
  *   frontend agnóstico ao Spring Security.
+ *
+ * FIX: buildClaims agora usa HashMap em vez de Map.of().
+ *   Map.of() lança IllegalArgumentException ao atingir 10 entradas.
+ *   HashMap não tem esse limite — novos claims podem ser adicionados com segurança.
  */
 @Slf4j
 @Service
@@ -62,7 +67,7 @@ public class JwtService {
 
     public String generateAccessToken(UserDetails userDetails) {
         if (userDetails instanceof User user) return generateAccessToken(user);
-        return buildToken(Map.of(), userDetails.getUsername(), accessTokenExpirationMs);
+        return buildToken(new HashMap<>(), userDetails.getUsername(), accessTokenExpirationMs);
     }
 
     // ── Reading ──────────────────────────────────────────────────────────────
@@ -101,27 +106,31 @@ public class JwtService {
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     /**
-     * Constrói os claims do JWT.
+     * Constrói os claims do JWT usando HashMap — sem limite de entradas.
+     *
+     * Anteriormente usava Map.of(), que lança IllegalArgumentException
+     * ao tentar inserir a 11ª entrada. HashMap elimina esse risco para
+     * futuras adições de claims sem necessidade de refatoração.
      *
      * role é emitido sem o prefixo "ROLE_" para manter o contrato
      * com o frontend agnóstico ao Spring Security.
-     * Mapeamento: "ROLE_ADMIN" → "admin", qualquer outro → "user".
      */
     private Map<String, Object> buildClaims(User user) {
         var roleForClient = toClientRole(user.getRole());
         var isAdmin       = "admin".equals(roleForClient);
 
-        return Map.of(
-                CLAIM_NAME_IDENTIFIER,     user.getFullName(),
-                CLAIM_FIRST_NAME,          user.getFirstName(),
-                CLAIM_LAST_NAME,           user.getLastName(),
-                CLAIM_USER_LOGIN,          user.getEmail(),
-                CLAIM_EMAIL,               user.getEmail(),
-                CLAIM_ID_USER,             user.getId(),
-                CLAIM_ROLE,                roleForClient,
-                CLAIM_TENANT,              "lume",
-                CLAIM_HAS_FULL_PERMISSION, isAdmin
-        );
+        // HashMap: sem limite de entradas, mutável para adições futuras
+        var claims = new HashMap<String, Object>();
+        claims.put(CLAIM_NAME_IDENTIFIER,     user.getFullName());
+        claims.put(CLAIM_FIRST_NAME,          user.getFirstName());
+        claims.put(CLAIM_LAST_NAME,           user.getLastName());
+        claims.put(CLAIM_USER_LOGIN,          user.getEmail());
+        claims.put(CLAIM_EMAIL,               user.getEmail());
+        claims.put(CLAIM_ID_USER,             user.getId());
+        claims.put(CLAIM_ROLE,                roleForClient);
+        claims.put(CLAIM_TENANT,              "lume");
+        claims.put(CLAIM_HAS_FULL_PERMISSION, isAdmin);
+        return claims;
     }
 
     /**
