@@ -1,0 +1,40 @@
+services:
+  # ============ BACKEND API ============
+  # ❌ DESABILITADO - Corrigir erros de compilação Java primeiro
+  # lume-api:
+  #   build:
+  #     context: ../lume-api
+  #     dockerfile: Dockerfile
+  #   container_name: lume-api
+  #   ports:
+  #     - "8080:8080"
+  #   environment:
+  #     SPRING_PROFILES_ACTIVE: docker
+  #     SERVER_PORT: 8080
+  #   restart: unless-stopped
+  #   networks:
+  #     - lume-network
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+  #     interval: 30s
+  #     timeout: 10s
+  #     retries: 3
+  #     start_period: 40s
+
+  # ============ FRONTEND WEB ============
+  lume-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lume-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_API_BASE_URL: http://localhost:8080
+    restart: unless-stopped
+    networks:
+      - lume-network
+
+networks:
+  lume-network:
+    driver: bridge

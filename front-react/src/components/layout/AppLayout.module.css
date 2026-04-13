@@ -1,0 +1,48 @@
+.app-layout {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+.app-main {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: margin-left var(--transition-base) ease-out;
+}
+
+/* Responsivo: Desktop - drawer visível ao lado, não overlay */
+@media (min-width: 769px) {
+  .app-main.collapsed {
+    margin-left: 80px;
+  }
+
+  .app-main.expanded {
+    margin-left: 250px;
+  }
+}
+
+/* Responsivo: Mobile - drawer é overlay */
+@media (max-width: 768px) {
+  .app-main {
+    margin-left: 0 !important;
+  }
+}
+
+/* Hide scrollbar but allow scrolling */
+.app-main::-webkit-scrollbar {
+  width: 8px;
+}
+
+.app-main::-webkit-scrollbar-track {
+  background: #f5f5f5;
+}
+
+.app-main::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 4px;
+}
+
+.app-main::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}

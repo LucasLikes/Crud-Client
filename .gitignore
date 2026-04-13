@@ -1,0 +1,18 @@
+# ==== FRONT ====
+front-react/node_modules/
+front-react/dist/
+front-react/.env
+
+# ==== BACK (Java/Maven) ====
+lume-api/target/
+
+# ==== IDE ====
+.idea/
+.vscode/
+
+# ==== SISTEMA ====
+.DS_Store
+Thumbs.db
+
+# ==== LOGS ====
+*.log
